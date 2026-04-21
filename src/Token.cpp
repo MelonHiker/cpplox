@@ -5,22 +5,15 @@
 
 #include "Util.hpp"
 
-class Token {
-    const TokenType type;
-    const std::string lexeme;
-    const Literal literal;
-    const int line;
+Token::Token(TokenType type, std::string lexeme, Literal literal, int line)
+    : type(type), lexeme(std::move(lexeme)), literal(std::move(literal)), line(line) {}
 
-    Token(TokenType type, std::string lexeme, Literal literal, int line)
-        : type(type), lexeme(lexeme), literal(literal), line(line) {}
+std::string Token::toString() const {
+    std::string literalString =
+        std::visit(overloaded{[](const std::string& s) { return s; },
+                              [](double d) { return std::to_string(d); },
+                              [](std::monostate) { return std::string("null"); }},
+                   literal);
 
-   public:
-    std::string toString() {
-        std::string literalString;
-        literalString = std::visit(overloaded{[](const std::string& s) { return s; },
-                                              [](const double d) { return std::to_string(d); },
-                                              [](std::monostate) { return "null"; }},
-                                   literal);
-        return typeToString(type) + " " + lexeme + " " + literalString;
-    }
-};
+    return typeToString(type) + " " + lexeme + " " + literalString;
+}
